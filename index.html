@@ -1,0 +1,354 @@
+"use client";
+import React, { useMemo, useRef, useState } from "react";
+import { Upload, Calculator, Info, Lightbulb, Download, Eye, EyeOff, Grid, Focus, Sparkles } from "lucide-react";
+
+/**
+ * GHR Image Analyzer – enhanced
+ * - Upload an image and overlay a golden ratio grid + optional spiral
+ * - Manually gauge FR/SC/NSR/DL and see GHR score
+ * - Choose golden focus corner (NW/NE/SW/SE)
+ * - Overlay opacity control
+ * - Export annotated image as PNG
+ * - Clean Tailwind UI
+ */
+
+// --- math helpers -----------------------------------------------------------
+const gaussianFit = (value, optimal, tolerance) => {
+  return Math.exp(-Math.pow(value - optimal, 2) / (2 * Math.pow(tolerance, 2)));
+};
+
+const gradeFor = (score) => {
+  if (score >= 80) return { label: "優秀", color: "#16a34a", desc: "黄金比に強く適合しています" };
+  if (score >= 60) return { label: "良好", color: "#2563eb", desc: "調整次第でさらに向上します" };
+  if (score >= 40) return { label: "要改善", color: "#ca8a04", desc: "主要な構図要素に課題があります" };
+  return { label: "不安定", color: "#dc2626", desc: "黄金比から大きく外れています" };
+};
+
+// --- UI subcomponents -------------------------------------------------------
+const Slider = ({ label, value, onChange, min, max, step, optimal, unit = "%" }) => (
+  <div className="mb-4">
+    <div className="flex justify-between items-center mb-1">
+      <label className="text-xs font-medium text-gray-600">{label}</label>
+      <span className="text-sm font-bold text-gray-900">{value}{unit}</span>
+    </div>
+    <input
+      type="range"
+      min={min}
+      max={max}
+      step={step}
+      value={value}
+      onChange={(e) => onChange(parseFloat(e.target.value))}
+      className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+    />
+    {optimal != null && (
+      <div className="text-xs text-gray-400 text-center mt-0.5">最適: {optimal}{unit}</div>
+    )}
+  </div>
+);
+
+// golden overlay as SVG positioned over the img
+function GoldenOverlay({ show, spiral, corner = "SE", opacity = 1 }) {
+  if (!show) return null;
+
+  // 38.2% / 61.8% lines – we flip depending on chosen corner for the focus dot
+  const lines = (
+    <>
+      <line x1="38.2%" y1="0" x2="38.2%" y2="100%" stroke="#fbbf24" strokeWidth="2" strokeDasharray="5,5" />
+      <line x1="61.8%" y1="0" x2="61.8%" y2="100%" stroke="#fbbf24" strokeWidth="2" strokeDasharray="5,5" />
+      <line x1="0" y1="38.2%" x2="100%" y2="38.2%" stroke="#fbbf24" strokeWidth="2" strokeDasharray="5,5" />
+      <line x1="0" y1="61.8%" x2="100%" y2="61.8%" stroke="#fbbf24" strokeWidth="2" strokeDasharray="5,5" />
+    </>
+  );
+
+  const focusMap = {
+    SE: { cx: "61.8%", cy: "61.8%" },
+    NE: { cx: "61.8%", cy: "38.2%" },
+    SW: { cx: "38.2%", cy: "61.8%" },
+    NW: { cx: "38.2%", cy: "38.2%" },
+  };
+  const f = focusMap[corner] || focusMap.SE;
+
+  return (
+    <svg className="absolute inset-0 w-full h-full" style={{ pointerEvents: "none", opacity }}>
+      {lines}
+      <circle cx={f.cx} cy={f.cy} r="8" fill="#fbbf24" opacity="0.9" />
+      {spiral && (
+        // A very rough spiral hint using a quadratic path; for visual guidance only
+        <path d="M 100% 100% Q 100% 61.8% 61.8% 61.8% Q 38.2% 61.8% 38.2% 38.2% Q 38.2% 0 0 0" stroke="#f59e0b" strokeWidth="1.75" fill="none" />
+      )}
+    </svg>
+  );
+}
+
+export default function GHRImageAnalyzer() {
+  const [image, setImage] = useState(null);
+  const [imgSize, setImgSize] = useState({ w: 0, h: 0 });
+
+  // parameters (manual visual estimation)
+  const [fr, setFr] = useState(35);
+  const [sc, setSc] = useState(5);
+  const [nsr, setNsr] = useState(25);
+  const [dl, setDl] = useState(3.5);
+
+  // overlay controls
+  const [showOverlay, setShowOverlay] = useState(true);
+  const [showSpiral, setShowSpiral] = useState(true);
+  const [focusCorner, setFocusCorner] = useState("SE"); // SE/NE/SW/NW
+  const [overlayOpacity, setOverlayOpacity] = useState(0.9);
+
+  const fileInputRef = useRef(null);
+  const imgRef = useRef(null);
+
+  const onUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!/^image\//.test(file.type)) return alert("画像ファイルを選択してください");
+
+    const reader = new FileReader();
+    reader.onload = (ev) => setImage(ev.target?.result);
+    reader.readAsDataURL(file);
+  };
+
+  const onImgLoad = (e) => {
+    const el = e.currentTarget;
+    setImgSize({ w: el.naturalWidth, h: el.naturalHeight });
+  };
+
+  // fits + score
+  const frFit = useMemo(() => gaussianFit(fr, 35, 10), [fr]);
+  const scFit = useMemo(() => gaussianFit(sc, 5, 2), [sc]);
+  const nsrFit = useMemo(() => gaussianFit(nsr, 25, 10), [nsr]);
+  const dlFit = useMemo(() => gaussianFit(dl, 3.5, 1.5), [dl]);
+  const ghr = useMemo(() => (0.40 * frFit + 0.25 * scFit + 0.20 * nsrFit + 0.15 * dlFit) * 100, [frFit, scFit, nsrFit, dlFit]);
+  const grade = useMemo(() => gradeFor(ghr), [ghr]);
+
+  // suggestions
+  const improvements = useMemo(() => {
+    const out = [];
+    if (fr < 25) out.push({ icon: "🎯", text: "主役が小さすぎます。30–37%を目指す" });
+    if (fr > 45) out.push({ icon: "🎯", text: "主役が大きすぎます。圧迫感を下げる" });
+    if (sc < 3) out.push({ icon: "🎨", text: "副要素を増やして視線誘導のリズムを作る" });
+    if (sc > 7) out.push({ icon: "🎨", text: "副要素を削減し、焦点を明確化" });
+    if (nsr < 15) out.push({ icon: "🌌", text: "余白が不足。暗部/空などのネガティブスペースを増やす" });
+    if (nsr > 35) out.push({ icon: "🌌", text: "余白過多。意味のある要素を加えて密度調整" });
+    if (dl < 2.5) out.push({ icon: "📐", text: "前景/背景の要素を追加して3層以上に" });
+    if (dl > 4.5) out.push({ icon: "📐", text: "階層が多すぎ。3–4層に集約" });
+    if (!out.length) out.push({ icon: "✨", text: "バランス良好。この設計を維持" });
+    return out;
+  }, [fr, sc, nsr, dl]);
+
+  // export annotated image as PNG (draw image + overlay onto canvas)
+  const exportPNG = async () => {
+    if (!image || !imgRef.current) return;
+    const imgEl = imgRef.current;
+    const canvas = document.createElement("canvas");
+    const w = imgEl.naturalWidth;
+    const h = imgEl.naturalHeight;
+    canvas.width = w; canvas.height = h;
+    const ctx = canvas.getContext("2d");
+    // draw base image
+    ctx.drawImage(imgEl, 0, 0, w, h);
+
+    // overlay lines (convert percentages to pixels)
+    ctx.save();
+    ctx.globalAlpha = overlayOpacity;
+    ctx.strokeStyle = "#fbbf24";
+    ctx.setLineDash([10, 10]);
+    ctx.lineWidth = Math.max(2, w * 0.002);
+    const x382 = 0.382 * w, x618 = 0.618 * w, y382 = 0.382 * h, y618 = 0.618 * h;
+    // grid
+    ctx.beginPath();
+    ctx.moveTo(x382, 0); ctx.lineTo(x382, h);
+    ctx.moveTo(x618, 0); ctx.lineTo(x618, h);
+    ctx.moveTo(0, y382); ctx.lineTo(w, y382);
+    ctx.moveTo(0, y618); ctx.lineTo(w, y618);
+    ctx.stroke();
+
+    // focus dot
+    const focusPx = {
+      SE: { x: x618, y: y618 },
+      NE: { x: x618, y: y382 },
+      SW: { x: x382, y: y618 },
+      NW: { x: x382, y: y382 },
+    }[focusCorner] || { x: x618, y: y618 };
+    ctx.setLineDash([]);
+    ctx.fillStyle = "#fbbf24";
+    ctx.beginPath();
+    ctx.arc(focusPx.x, focusPx.y, Math.max(6, w * 0.008), 0, Math.PI * 2);
+    ctx.fill();
+
+    // spiral hint
+    if (showSpiral) {
+      ctx.strokeStyle = "#f59e0b";
+      ctx.lineWidth = Math.max(1.5, w * 0.0015);
+      ctx.beginPath();
+      // rough bezier segments approximating a spiral quadrant
+      ctx.moveTo(w, h);
+      ctx.quadraticCurveTo(w, y618, x618, y618);
+      ctx.quadraticCurveTo(x382, y618, x382, y382);
+      ctx.quadraticCurveTo(x382, 0, 0, 0);
+      ctx.stroke();
+    }
+
+    ctx.restore();
+
+    const url = canvas.toDataURL("image/png");
+    const a = document.createElement("a");
+    a.href = url; a.download = "ghr_annotated.png";
+    a.click();
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50 p-4">
+      <div className="max-w-7xl mx-auto">
+        <div className="text-center mb-6">
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <Calculator className="w-10 h-10 text-indigo-600" />
+            <h1 className="text-4xl font-bold text-gray-900">GHR Image Analyzer</h1>
+          </div>
+          <p className="text-gray-600">黄金調和比による画像構図分析ツール</p>
+        </div>
+
+        <div className="grid lg:grid-cols-3 gap-6">
+          {/* left: upload & preview */}
+          <div className="lg:col-span-2 space-y-4">
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                <Upload className="w-5 h-5" />
+                画像をアップロード
+              </h2>
+
+              {!image ? (
+                <div
+                  onClick={() => fileInputRef.current?.click()}
+                  className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center cursor-pointer hover:border-indigo-400 hover:bg-indigo-50 transition"
+                >
+                  <Upload className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                  <p className="text-gray-600 mb-2">クリックして画像を選択</p>
+                  <p className="text-sm text-gray-400">JPG / PNG / WebP 対応</p>
+                </div>
+              ) : (
+                <div className="relative">
+                  <img ref={imgRef} src={image} alt="Uploaded" onLoad={onImgLoad} className="w-full rounded-lg shadow-md" />
+                  <GoldenOverlay show={showOverlay} spiral={showSpiral} corner={focusCorner} opacity={overlayOpacity} />
+
+                  <div className="absolute top-4 right-4 flex flex-wrap gap-2">
+                    <button onClick={() => setShowOverlay(v=>!v)} className="bg-white/90 backdrop-blur px-3 py-1.5 rounded-lg text-sm font-medium shadow-lg hover:bg-white flex items-center gap-1">
+                      {showOverlay ? <EyeOff className="w-4 h-4"/> : <Eye className="w-4 h-4"/>}
+                      {showOverlay ? "グリッド非表示" : "グリッド表示"}
+                    </button>
+                    <button onClick={() => setShowSpiral(v=>!v)} className="bg-white/90 backdrop-blur px-3 py-1.5 rounded-lg text-sm font-medium shadow-lg hover:bg-white flex items-center gap-1">
+                      <Grid className="w-4 h-4"/>
+                      螺旋 {showSpiral ? "OFF" : "ON"}
+                    </button>
+                    <button onClick={exportPNG} className="bg-white/90 backdrop-blur px-3 py-1.5 rounded-lg text-sm font-medium shadow-lg hover:bg-white flex items-center gap-1">
+                      <Download className="w-4 h-4"/>
+                      PNG保存
+                    </button>
+                    <button onClick={() => fileInputRef.current?.click()} className="bg-white/90 backdrop-blur px-3 py-1.5 rounded-lg text-sm font-medium shadow-lg hover:bg-white">変更</button>
+                  </div>
+                </div>
+              )}
+
+              <input ref={fileInputRef} type="file" accept="image/*" onChange={onUpload} className="hidden" />
+
+              {image && (
+                <div className="grid sm:grid-cols-2 gap-4 mt-4">
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <div className="text-xs text-gray-600 mb-1 flex items-center gap-1"><Focus className="w-4 h-4"/>焦点位置</div>
+                    <div className="flex gap-2">
+                      {["NW","NE","SW","SE"].map((c) => (
+                        <button key={c} onClick={() => setFocusCorner(c)} className={`px-3 py-1.5 rounded-md text-xs border ${focusCorner===c?"bg-indigo-600 text-white border-indigo-600":"bg-white border-gray-300"}`}>{c}</button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="bg-gray-50 rounded-lg p-3">
+                    <div className="text-xs text-gray-600 mb-1">オーバーレイ透明度</div>
+                    <input type="range" min={0.1} max={1} step={0.05} value={overlayOpacity} onChange={(e)=>setOverlayOpacity(parseFloat(e.target.value))} className="w-full" />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {image && (
+              <div className="bg-white rounded-xl shadow-lg p-6">
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Info className="w-5 h-5" />
+                  パラメータ調整（目視で判定）
+                </h3>
+                <div className="grid md:grid-cols-2 gap-6">
+                  <Slider label="主役率 (FR)" value={fr} onChange={setFr} min={0} max={100} step={1} optimal={35} />
+                  <Slider label="副要素数 (SC)" value={sc} onChange={setSc} min={0} max={15} step={1} optimal={5} unit="個" />
+                  <Slider label="余白率 (NSR)" value={nsr} onChange={setNsr} min={0} max={100} step={1} optimal={25} />
+                  <Slider label="奥行き層 (DL)" value={dl} onChange={setDl} min={1} max={6} step={0.5} optimal={3.5} unit="層" />
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* right: score & suggestions */}
+          <div className="space-y-4">
+            <div className="bg-white rounded-xl shadow-lg p-6 text-center">
+              <div className="text-7xl font-bold mb-2" style={{ color: grade.color }}>{ghr.toFixed(1)}</div>
+              <div className="text-2xl font-semibold mb-2" style={{ color: grade.color }}>{grade.label}</div>
+              <p className="text-sm text-gray-600">{grade.desc}</p>
+              {image && (
+                <p className="text-xs text-gray-400 mt-2">{imgSize.w}×{imgSize.h}px</p>
+              )}
+            </div>
+
+            <div className="bg-white rounded-xl shadow-lg p-6">
+              <h3 className="font-semibold mb-3 flex items-center gap-2">
+                <Info className="w-5 h-5" />
+                構成要素の適合度
+              </h3>
+              {[
+                { label: "主役率", value: frFit, weight: 40 },
+                { label: "副要素リズム", value: scFit, weight: 25 },
+                { label: "余白率", value: nsrFit, weight: 20 },
+                { label: "奥行き層", value: dlFit, weight: 15 },
+              ].map((item, i) => (
+                <div key={i} className="mb-3">
+                  <div className="flex justify-between text-xs mb-1">
+                    <span className="text-gray-600">{item.label} ({item.weight}%)</span>
+                    <span className="font-medium">{(item.value * 100).toFixed(0)}%</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                    <div className="bg-indigo-600 h-2 rounded-full transition-all duration-300" style={{ width: `${Math.max(0, Math.min(1, item.value)) * 100}%` }} />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl shadow-lg p-6">
+              <h3 className="font-semibold mb-3 flex items-center gap-2">
+                <Lightbulb className="w-5 h-5 text-amber-600" />
+                改善提案
+              </h3>
+              <div className="space-y-2">
+                {improvements.map((item, i) => (
+                  <div key={i} className="p-3 rounded-lg text-sm bg-white/70 border border-amber-200">
+                    <span className="mr-2">{item.icon}</span>
+                    {item.text}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="bg-gray-50 rounded-xl p-4 text-xs text-gray-600">
+              <p className="font-semibold mb-1">💡 使い方のヒント</p>
+              <ol className="list-decimal list-inside space-y-1">
+                <li>画像をアップロード</li>
+                <li>黄金比グリッド／螺旋と焦点コーナーを切替えて“置き所”を確認</li>
+                <li>目視で FR/SC/NSR/DL をスライダーで設定</li>
+                <li>スコアと提案を次の生成プロンプト調整に使う</li>
+                <li>必要なら PNG保存で注釈付き画像を書き出し</li>
+              </ol>
+              <div className="mt-2 text-[11px] text-gray-500 flex items-center gap-1"><Sparkles className="w-3.5 h-3.5"/>将来拡張: 自動推定（セグメンテーション/サリエンシー）や小物可視率の検出を追加可能。</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
