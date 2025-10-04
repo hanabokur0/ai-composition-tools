@@ -1,0 +1,189 @@
+import React, { useState } from 'react';
+import { Calculator, Info } from 'lucide-react';
+
+const GHRCalculator = () => {
+  const [fr, setFr] = useState(35);
+  const [sc, setSc] = useState(5);
+  const [nsr, setNsr] = useState(25);
+  const [dl, setDl] = useState(3.5);
+  
+  // ガウシアン適合度関数
+  const gaussianFit = (value, optimal, tolerance) => {
+    return Math.exp(-Math.pow(value - optimal, 2) / (2 * Math.pow(tolerance, 2)));
+  };
+  
+  // 各要素の適合度計算
+  const frFit = gaussianFit(fr, 35, 10);
+  const scFit = gaussianFit(sc, 5, 2);
+  const nsrFit = gaussianFit(nsr, 25, 10);
+  const dlFit = gaussianFit(dl, 3.5, 1.5);
+  
+  // GHRスコア計算
+  const ghr = (0.40 * frFit + 0.25 * scFit + 0.20 * nsrFit + 0.15 * dlFit) * 100;
+  
+  // グレード判定
+  const getGrade = (score) => {
+    if (score >= 80) return { label: '優秀', color: 'text-green-600', bg: 'bg-green-50' };
+    if (score >= 60) return { label: '良好', color: 'text-blue-600', bg: 'bg-blue-50' };
+    if (score >= 40) return { label: '要改善', color: 'text-yellow-600', bg: 'bg-yellow-50' };
+    return { label: '不安定', color: 'text-red-600', bg: 'bg-red-50' };
+  };
+  
+  const grade = getGrade(ghr);
+  
+  const Slider = ({ label, value, onChange, min, max, step, optimal, unit = '%' }) => (
+    <div className="mb-6">
+      <div className="flex justify-between items-center mb-2">
+        <label className="text-sm font-medium text-gray-700">{label}</label>
+        <span className="text-sm font-bold text-gray-900">{value}{unit}</span>
+      </div>
+      <input
+        type="range"
+        min={min}
+        max={max}
+        step={step}
+        value={value}
+        onChange={(e) => onChange(parseFloat(e.target.value))}
+        className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+      />
+      <div className="flex justify-between text-xs text-gray-500 mt-1">
+        <span>{min}{unit}</span>
+        <span className="text-blue-600">最適: {optimal}{unit}</span>
+        <span>{max}{unit}</span>
+      </div>
+    </div>
+  );
+  
+  return (
+    <div className="max-w-4xl mx-auto p-6 bg-white">
+      <div className="text-center mb-8">
+        <div className="flex items-center justify-center gap-3 mb-2">
+          <Calculator className="w-8 h-8 text-blue-600" />
+          <h1 className="text-3xl font-bold text-gray-900">GHR Calculator</h1>
+        </div>
+        <p className="text-gray-600">Golden Harmony Ratio - 黄金調和比計算機</p>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-8">
+        <div className="space-y-4">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">パラメータ設定</h2>
+          
+          <Slider
+            label="主役率 (FR)"
+            value={fr}
+            onChange={setFr}
+            min={0}
+            max={100}
+            step={1}
+            optimal={35}
+          />
+          
+          <Slider
+            label="副要素数 (SC)"
+            value={sc}
+            onChange={setSc}
+            min={0}
+            max={15}
+            step={1}
+            optimal={5}
+            unit="個"
+          />
+          
+          <Slider
+            label="余白率 (NSR)"
+            value={nsr}
+            onChange={setNsr}
+            min={0}
+            max={100}
+            step={1}
+            optimal={25}
+          />
+          
+          <Slider
+            label="奥行き層 (DL)"
+            value={dl}
+            onChange={setDl}
+            min={1}
+            max={6}
+            step={0.5}
+            optimal={3.5}
+            unit="層"
+          />
+        </div>
+
+        <div className="space-y-6">
+          <div className={`${grade.bg} rounded-lg p-6 text-center`}>
+            <div className="text-6xl font-bold mb-2" style={{color: ghr >= 80 ? '#16a34a' : ghr >= 60 ? '#2563eb' : ghr >= 40 ? '#ca8a04' : '#dc2626'}}>
+              {ghr.toFixed(1)}
+            </div>
+            <div className={`text-2xl font-semibold ${grade.color}`}>{grade.label}</div>
+          </div>
+
+          <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+            <h3 className="font-semibold text-gray-800 flex items-center gap-2">
+              <Info className="w-5 h-5" />
+              各要素の適合度
+            </h3>
+            
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">主役率適合度 (40%)</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-32 bg-gray-200 rounded-full h-2">
+                    <div className="bg-blue-600 h-2 rounded-full" style={{width: `${frFit * 100}%`}}></div>
+                  </div>
+                  <span className="text-sm font-medium w-12 text-right">{(frFit * 100).toFixed(0)}%</span>
+                </div>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">副要素リズム (25%)</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-32 bg-gray-200 rounded-full h-2">
+                    <div className="bg-blue-600 h-2 rounded-full" style={{width: `${scFit * 100}%`}}></div>
+                  </div>
+                  <span className="text-sm font-medium w-12 text-right">{(scFit * 100).toFixed(0)}%</span>
+                </div>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">余白率適合度 (20%)</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-32 bg-gray-200 rounded-full h-2">
+                    <div className="bg-blue-600 h-2 rounded-full" style={{width: `${nsrFit * 100}%`}}></div>
+                  </div>
+                  <span className="text-sm font-medium w-12 text-right">{(nsrFit * 100).toFixed(0)}%</span>
+                </div>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">奥行き階層 (15%)</span>
+                <div className="flex items-center gap-2">
+                  <div className="w-32 bg-gray-200 rounded-full h-2">
+                    <div className="bg-blue-600 h-2 rounded-full" style={{width: `${dlFit * 100}%`}}></div>
+                  </div>
+                  <span className="text-sm font-medium w-12 text-right">{(dlFit * 100).toFixed(0)}%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-blue-50 rounded-lg p-4 text-sm text-gray-700">
+            <p className="font-semibold mb-2">💡 改善提案</p>
+            {fr < 25 && <p>• 主役が小さすぎます。30-37%を目指しましょう</p>}
+            {fr > 45 && <p>• 主役が大きすぎます。画面が窮屈です</p>}
+            {sc < 3 && <p>• 副要素を増やして構図にリズムを</p>}
+            {sc > 7 && <p>• 副要素が多すぎて視線が散ります</p>}
+            {nsr < 15 && <p>• 余白が不足。視覚的な休息ゾーンが必要です</p>}
+            {nsr > 35 && <p>• 余白が多すぎて空虚な印象です</p>}
+            {dl < 2.5 && <p>• 奥行きが浅く平面的です</p>}
+            {dl > 4.5 && <p>• 層が多すぎて複雑です</p>}
+            {ghr >= 80 && <p className="text-green-700">✨ 素晴らしい!黄金比に強く適合しています</p>}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default GHRCalculator;
