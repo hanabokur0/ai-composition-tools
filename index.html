@@ -11,9 +11,6 @@
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: 'Noto Sans JP', system-ui, sans-serif; background: #fafafa; color: #1a1a1a; }
-.mono { font-family: 'IBM Plex Mono', monospace; }
-
-/* layout */
 .header { border-bottom: 1px solid #e5e5e5; background: #fff; padding: 16px 24px; }
 .header h1 { font-family: 'IBM Plex Mono', monospace; font-size: 20px; font-weight: 700; }
 .header h1 span { color: #a3a3a3; font-weight: 400; }
@@ -21,29 +18,27 @@ body { font-family: 'Noto Sans JP', system-ui, sans-serif; background: #fafafa; 
 .container { max-width: 1200px; margin: 0 auto; padding: 24px 16px; }
 .grid { display: grid; grid-template-columns: 1fr; gap: 24px; }
 @media (min-width: 1024px) { .grid { grid-template-columns: 7fr 5fr; } }
-
-/* cards */
 .card { background: #fff; border: 1px solid #e5e5e5; border-radius: 8px; overflow: hidden; }
 .card-body { padding: 20px; }
-
-/* upload area */
 .upload-zone { padding: 64px 24px; text-align: center; cursor: pointer; transition: background 0.2s; }
 .upload-zone:hover { background: #f5f5f5; }
 .upload-icon { width: 48px; height: 48px; margin: 0 auto 16px; background: #f5f5f5; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-
-/* image container */
-.img-wrap { position: relative; line-height: 0; }
-.img-wrap img { width: 100%; display: block; }
+.img-wrap { position: relative; line-height: 0; user-select: none; -webkit-user-select: none; }
+.img-wrap img { width: 100%; display: block; pointer-events: none; }
 .img-overlay { position: absolute; inset: 0; pointer-events: none; }
 .estimating-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; }
 .estimating-text { color: #fff; font-family: 'IBM Plex Mono', monospace; font-size: 13px; animation: pulse 1.5s infinite; }
 @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
-
-/* controls bar */
+.subject-box { position: absolute; border: 2px solid #f43f5e; background: rgba(244,63,94,0.12); pointer-events: none; border-radius: 2px; }
+.subject-label { position: absolute; top: -18px; left: 0; font-size: 9px; font-family: 'IBM Plex Mono', monospace; color: #f43f5e; font-weight: 600; }
+.subject-hint { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); font-size: 11px; font-family: 'IBM Plex Mono', monospace; color: #fff; background: rgba(244,63,94,0.75); padding: 4px 12px; border-radius: 4px; pointer-events: none; white-space: nowrap; }
 .controls-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 0; font-size: 12px; }
 .btn { padding: 6px 12px; border-radius: 4px; border: 1px solid #d4d4d4; background: #fff; color: #525252; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.15s; }
 .btn:hover { background: #f5f5f5; }
 .btn-active { background: #171717; color: #fff; border-color: #171717; }
+.btn-rose { background: #f43f5e; color: #fff; border-color: #f43f5e; }
+.btn-rose:hover { background: #e11d48; }
+.btn-rose-outline { background: #fff1f2; color: #e11d48; border-color: #fecdd3; }
 .btn-group { display: flex; border: 1px solid #d4d4d4; border-radius: 4px; overflow: hidden; }
 .btn-group button { padding: 6px 10px; border: none; background: #fff; color: #525252; font-family: 'IBM Plex Mono', monospace; font-size: 11px; cursor: pointer; transition: all 0.15s; }
 .btn-group button:not(:last-child) { border-right: 1px solid #d4d4d4; }
@@ -52,16 +47,12 @@ body { font-family: 'Noto Sans JP', system-ui, sans-serif; background: #fafafa; 
 .opacity-ctrl { display: flex; align-items: center; gap: 6px; color: #737373; }
 .opacity-ctrl input { width: 72px; height: 4px; appearance: none; background: #d4d4d4; border-radius: 2px; cursor: pointer; }
 .dim-label { font-family: 'IBM Plex Mono', monospace; color: #a3a3a3; font-size: 11px; }
-
-/* score band */
 .band-card { border-width: 2px; padding: 24px; text-align: center; transition: all 0.3s; }
 .band-score { font-family: 'IBM Plex Mono', monospace; font-size: 48px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
 .band-label { font-size: 18px; font-weight: 700; }
 .band-action { display: inline-block; font-size: 11px; padding: 2px 10px; border-radius: 99px; color: #fff; font-weight: 500; margin-left: 8px; }
 .band-desc { font-size: 12px; color: #737373; margin-top: 8px; }
 .band-pipeline { margin-top: 12px; padding-top: 12px; font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #a3a3a3; }
-
-/* fit bars */
 .section-title { font-size: 11px; font-weight: 700; color: #737373; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 12px; }
 .fit-row { margin-bottom: 12px; }
 .fit-header { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; }
@@ -69,31 +60,27 @@ body { font-family: 'Noto Sans JP', system-ui, sans-serif; background: #fafafa; 
 .fit-val { font-family: 'IBM Plex Mono', monospace; font-weight: 700; }
 .fit-track { width: 100%; height: 6px; background: #f5f5f5; border-radius: 3px; overflow: hidden; }
 .fit-fill { height: 100%; border-radius: 3px; transition: width 0.5s; }
-
-/* param sliders */
 .param { margin-bottom: 20px; }
 .param-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
 .param-left { display: flex; align-items: center; gap: 8px; }
-.param-tag { font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; color: #737373; letter-spacing: 0.05em; }
+.param-tag { font-family: 'IBM Plex Mono', monospace; font-size: 11px; text-transform: uppercase; color: #737373; }
 .param-label { font-size: 13px; color: #404040; }
-.param-auto { font-size: 9px; padding: 2px 6px; border-radius: 3px; background: #dcfce7; color: #15803d; font-weight: 500; }
+.param-badge { font-size: 9px; padding: 2px 6px; border-radius: 3px; font-weight: 600; }
+.param-badge-user { background: #fce7f3; color: #be185d; }
+.param-badge-auto { background: #dcfce7; color: #15803d; }
 .param-value { font-family: 'IBM Plex Mono', monospace; font-size: 13px; font-weight: 700; }
 .param-slider-wrap { position: relative; }
 .param-slider { width: 100%; height: 6px; appearance: none; border-radius: 3px; cursor: pointer; outline: none; }
 .param-slider::-webkit-slider-thumb { appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #404040; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.2); cursor: pointer; }
 .param-optimal { position: absolute; top: 0; width: 1px; height: 6px; background: #f59e0b; pointer-events: none; }
 .param-range { display: flex; justify-content: space-between; font-size: 10px; color: #a3a3a3; margin-top: 2px; }
-.param-range-center { text-align: center; }
-.reset-btn { font-size: 10px; color: #16a34a; cursor: pointer; background: none; border: none; font-weight: 500; margin-top: -8px; margin-bottom: 8px; }
-.reset-btn:hover { color: #15803d; }
-
-/* adjustments */
+.reset-btn { font-size: 10px; cursor: pointer; background: none; border: none; font-weight: 500; margin-top: -8px; margin-bottom: 8px; color: #16a34a; }
+.reset-btn:hover { text-decoration: underline; }
 .adj-item { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #525252; padding: 8px 0; border-bottom: 1px solid #f5f5f5; }
 .adj-item:last-child { border-bottom: none; }
-
-/* fixed spec */
 .spec { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: #a3a3a3; line-height: 1.8; padding: 0 4px; }
 .spec-title { color: #737373; font-weight: 700; margin-bottom: 2px; }
+.fr-info { font-size: 10px; padding: 8px 12px; border-radius: 6px; margin-bottom: 12px; font-family: 'IBM Plex Mono', monospace; }
 </style>
 </head>
 <body>
@@ -101,7 +88,6 @@ body { font-family: 'Noto Sans JP', system-ui, sans-serif; background: #fafafa; 
 <script type="text/babel">
 const { useState, useMemo, useRef, useCallback } = React;
 
-/* ── constants (fixed) ── */
 const PHI = 0.618033988749895;
 const PHI_INV = 1 - PHI;
 const WEIGHTS = { fr: 0.40, sc: 0.25, nsr: 0.20, dl: 0.15 };
@@ -113,388 +99,245 @@ const BANDS = [
   { min: 0,  label: "Hold",     color: "#dc2626", bg: "#fef2f2", border: "#fecaca", action: "保留", desc: "構造的な再検討が必要。" },
 ];
 
-/* ── math ── */
 const gaussFit = (v, o, s) => Math.exp(-((v - o) ** 2) / (2 * s ** 2));
 const calcGHR = (fr, sc, nsr, dl) => {
-  const fits = {
-    fr:  gaussFit(fr, OPTIMAL.fr, SIGMA.fr),
-    sc:  gaussFit(sc, OPTIMAL.sc, SIGMA.sc),
-    nsr: gaussFit(nsr, OPTIMAL.nsr, SIGMA.nsr),
-    dl:  gaussFit(dl, OPTIMAL.dl, SIGMA.dl),
-  };
-  const score = (WEIGHTS.fr * fits.fr + WEIGHTS.sc * fits.sc + WEIGHTS.nsr * fits.nsr + WEIGHTS.dl * fits.dl) * 100;
-  return { score, fits };
+  const fits = { fr: gaussFit(fr, OPTIMAL.fr, SIGMA.fr), sc: gaussFit(sc, OPTIMAL.sc, SIGMA.sc), nsr: gaussFit(nsr, OPTIMAL.nsr, SIGMA.nsr), dl: gaussFit(dl, OPTIMAL.dl, SIGMA.dl) };
+  return { score: (WEIGHTS.fr*fits.fr + WEIGHTS.sc*fits.sc + WEIGHTS.nsr*fits.nsr + WEIGHTS.dl*fits.dl) * 100, fits };
 };
 const getBand = (s) => BANDS.find(b => s >= b.min) || BANDS[2];
 
-/* ── saliency FR estimation ── */
 function estimateFR(imgEl, canvas) {
-  const W = 200;
-  const aspect = imgEl.naturalHeight / imgEl.naturalWidth;
-  const H = Math.round(W * aspect);
+  const W = 200, aspect = imgEl.naturalHeight / imgEl.naturalWidth, H = Math.round(W * aspect);
   canvas.width = W; canvas.height = H;
   const ctx = canvas.getContext("2d", { willReadFrequently: true });
   ctx.drawImage(imgEl, 0, 0, W, H);
-  const px = ctx.getImageData(0, 0, W, H).data;
-  const total = W * H;
-
-  // grayscale
+  const px = ctx.getImageData(0, 0, W, H).data, total = W * H;
   const lum = new Float32Array(total);
-  for (let i = 0; i < total; i++) {
-    const o = i * 4;
-    lum[i] = 0.299 * px[o] + 0.587 * px[o+1] + 0.114 * px[o+2];
-  }
-
-  // box blur 3x3
-  const blurred = new Float32Array(total);
-  for (let y = 0; y < H; y++) {
-    for (let x = 0; x < W; x++) {
-      let sum = 0, cnt = 0;
-      for (let dy = -1; dy <= 1; dy++) {
-        for (let dx = -1; dx <= 1; dx++) {
-          const ny = y+dy, nx = x+dx;
-          if (ny >= 0 && ny < H && nx >= 0 && nx < W) { sum += lum[ny*W+nx]; cnt++; }
-        }
-      }
-      blurred[y*W+x] = sum / cnt;
-    }
-  }
-
-  // sobel edges
-  const edges = new Float32Array(total);
-  let maxE = 0;
-  for (let y = 1; y < H-1; y++) {
-    for (let x = 1; x < W-1; x++) {
-      const gx = -blurred[(y-1)*W+(x-1)] + blurred[(y-1)*W+(x+1)]
-               - 2*blurred[y*W+(x-1)] + 2*blurred[y*W+(x+1)]
-               - blurred[(y+1)*W+(x-1)] + blurred[(y+1)*W+(x+1)];
-      const gy = -blurred[(y-1)*W+(x-1)] - 2*blurred[(y-1)*W+x] - blurred[(y-1)*W+(x+1)]
-               + blurred[(y+1)*W+(x-1)] + 2*blurred[(y+1)*W+x] + blurred[(y+1)*W+(x+1)];
-      const m = Math.sqrt(gx*gx + gy*gy);
-      edges[y*W+x] = m;
-      if (m > maxE) maxE = m;
-    }
-  }
-
-  // combine saliency
-  const cx = W/2, cy = H/2, maxD = Math.sqrt(cx*cx + cy*cy);
-  let meanL = 0;
-  for (let i = 0; i < total; i++) meanL += blurred[i];
-  meanL /= total;
-
-  const sal = new Float32Array(total);
-  let minS = Infinity, maxS = -Infinity;
-  for (let y = 0; y < H; y++) {
-    for (let x = 0; x < W; x++) {
-      const i = y*W+x;
-      const lc = Math.abs(blurred[i] - meanL) / 255;
-      const en = maxE > 0 ? edges[i] / maxE : 0;
-      const cb = 1 - 0.3 * (Math.sqrt((x-cx)**2 + (y-cy)**2) / maxD);
-      const s = (0.5*lc + 0.5*en) * cb;
-      sal[i] = s;
-      if (s < minS) minS = s;
-      if (s > maxS) maxS = s;
-    }
-  }
-
-  // 5. threshold into binary salient map
-  const thresh = minS + (maxS - minS) * 0.55;
-  const binary = new Uint8Array(total);
-  for (let i = 0; i < total; i++) binary[i] = sal[i] >= thresh ? 1 : 0;
-
-  // 6. connected-component labeling (flood fill) → find largest mass = subject
-  const labels = new Int32Array(total);
-  labels.fill(-1);
-  let labelId = 0;
-  const componentSizes = [];
-
-  for (let i = 0; i < total; i++) {
-    if (binary[i] === 0 || labels[i] !== -1) continue;
-    // BFS flood fill
-    const queue = [i];
-    labels[i] = labelId;
-    let size = 0;
-    while (queue.length > 0) {
-      const cur = queue.pop();
-      size++;
-      const cy2 = Math.floor(cur / W), cx2 = cur % W;
-      for (let dy = -1; dy <= 1; dy++) {
-        for (let dx = -1; dx <= 1; dx++) {
-          if (dy === 0 && dx === 0) continue;
-          const ny = cy2 + dy, nx = cx2 + dx;
-          if (ny >= 0 && ny < H && nx >= 0 && nx < W) {
-            const ni = ny * W + nx;
-            if (binary[ni] === 1 && labels[ni] === -1) {
-              labels[ni] = labelId;
-              queue.push(ni);
-            }
-          }
-        }
-      }
-    }
-    componentSizes.push({ id: labelId, size });
-    labelId++;
-  }
-
-  if (componentSizes.length === 0) return 35; // fallback to optimal
-
-  // 7. select subject: largest connected component
-  componentSizes.sort((a, b) => b.size - a.size);
-  const subjectId = componentSizes[0].id;
-
-  // 8. FR = subject area / total area
-  const subjectSize = componentSizes[0].size;
-  const frEstimate = Math.round((subjectSize / total) * 100);
-  return Math.max(1, Math.min(99, frEstimate));
+  for (let i = 0; i < total; i++) { const o = i*4; lum[i] = 0.299*px[o]+0.587*px[o+1]+0.114*px[o+2]; }
+  const bl = new Float32Array(total);
+  for (let y=0;y<H;y++) for (let x=0;x<W;x++) { let s=0,c=0; for (let dy=-1;dy<=1;dy++) for (let dx=-1;dx<=1;dx++) { const ny=y+dy,nx=x+dx; if(ny>=0&&ny<H&&nx>=0&&nx<W){s+=lum[ny*W+nx];c++;}} bl[y*W+x]=s/c; }
+  const ed = new Float32Array(total); let mE=0;
+  for (let y=1;y<H-1;y++) for (let x=1;x<W-1;x++) { const gx=-bl[(y-1)*W+(x-1)]+bl[(y-1)*W+(x+1)]-2*bl[y*W+(x-1)]+2*bl[y*W+(x+1)]-bl[(y+1)*W+(x-1)]+bl[(y+1)*W+(x+1)]; const gy=-bl[(y-1)*W+(x-1)]-2*bl[(y-1)*W+x]-bl[(y-1)*W+(x+1)]+bl[(y+1)*W+(x-1)]+2*bl[(y+1)*W+x]+bl[(y+1)*W+(x+1)]; const m=Math.sqrt(gx*gx+gy*gy); ed[y*W+x]=m; if(m>mE)mE=m; }
+  const cx=W/2,cy=H/2,mD=Math.sqrt(cx*cx+cy*cy); let mL=0; for(let i=0;i<total;i++) mL+=bl[i]; mL/=total;
+  const sa=new Float32Array(total); let sN=Infinity,sX=-Infinity;
+  for(let y=0;y<H;y++) for(let x=0;x<W;x++){const i=y*W+x,lc=Math.abs(bl[i]-mL)/255,en=mE>0?ed[i]/mE:0,cb=1-0.3*(Math.sqrt((x-cx)**2+(y-cy)**2)/mD),s=(0.5*lc+0.5*en)*cb;sa[i]=s;if(s<sN)sN=s;if(s>sX)sX=s;}
+  const th=sN+(sX-sN)*0.55,bn=new Uint8Array(total); for(let i=0;i<total;i++) bn[i]=sa[i]>=th?1:0;
+  const lb=new Int32Array(total); lb.fill(-1); let lid=0; const sz=[];
+  for(let i=0;i<total;i++){if(bn[i]===0||lb[i]!==-1)continue;const q=[i];lb[i]=lid;let s=0;while(q.length>0){const c=q.pop();s++;const cy2=Math.floor(c/W),cx2=c%W;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(dy===0&&dx===0)continue;const ny=cy2+dy,nx=cx2+dx;if(ny>=0&&ny<H&&nx>=0&&nx<W){const ni=ny*W+nx;if(bn[ni]===1&&lb[ni]===-1){lb[ni]=lid;q.push(ni);}}}}sz.push({id:lid,size:s});lid++;}
+  if(sz.length===0) return 35;
+  sz.sort((a,b)=>b.size-a.size);
+  return Math.max(1,Math.min(99,Math.round((sz[0].size/total)*100)));
 }
 
-/* ── components ── */
-function GoldenGrid({ show, corner, opacity }) {
-  if (!show) return null;
-  const p1 = (PHI_INV * 100).toFixed(2) + "%";
-  const p2 = (PHI * 100).toFixed(2) + "%";
-  const fm = { NW: [p1,p1], NE: [p2,p1], SW: [p1,p2], SE: [p2,p2] };
-  const [fx, fy] = fm[corner] || fm.SE;
-  return (
-    <svg className="img-overlay" style={{ opacity }}>
-      <line x1={p1} y1="0" x2={p1} y2="100%" stroke="#fbbf24" strokeWidth="1.5" strokeDasharray="6,4"/>
-      <line x1={p2} y1="0" x2={p2} y2="100%" stroke="#fbbf24" strokeWidth="1.5" strokeDasharray="6,4"/>
-      <line x1="0" y1={p1} x2="100%" y2={p1} stroke="#fbbf24" strokeWidth="1.5" strokeDasharray="6,4"/>
-      <line x1="0" y1={p2} x2="100%" y2={p2} stroke="#fbbf24" strokeWidth="1.5" strokeDasharray="6,4"/>
-      <circle cx={fx} cy={fy} r="12" fill="#fbbf24" opacity="0.85"/>
-      <circle cx={fx} cy={fy} r="28" fill="none" stroke="#fbbf24" strokeWidth="2" opacity="0.5"/>
-      <circle cx={fx} cy={fy} r="44" fill="none" stroke="#fbbf24" strokeWidth="1" opacity="0.25"/>
-    </svg>
-  );
+function GoldenGrid({show,corner,opacity}){
+  if(!show) return null;
+  const p1=(PHI_INV*100).toFixed(2)+"%", p2=(PHI*100).toFixed(2)+"%";
+  const fm={NW:[p1,p1],NE:[p2,p1],SW:[p1,p2],SE:[p2,p2]};
+  const [fx,fy]=fm[corner]||fm.SE;
+  return (<svg className="img-overlay" style={{opacity}}>
+    <line x1={p1} y1="0" x2={p1} y2="100%" stroke="#fbbf24" strokeWidth="1.5" strokeDasharray="6,4"/>
+    <line x1={p2} y1="0" x2={p2} y2="100%" stroke="#fbbf24" strokeWidth="1.5" strokeDasharray="6,4"/>
+    <line x1="0" y1={p1} x2="100%" y2={p1} stroke="#fbbf24" strokeWidth="1.5" strokeDasharray="6,4"/>
+    <line x1="0" y1={p2} x2="100%" y2={p2} stroke="#fbbf24" strokeWidth="1.5" strokeDasharray="6,4"/>
+    <circle cx={fx} cy={fy} r="12" fill="#fbbf24" opacity="0.85"/>
+    <circle cx={fx} cy={fy} r="28" fill="none" stroke="#fbbf24" strokeWidth="2" opacity="0.5"/>
+    <circle cx={fx} cy={fy} r="44" fill="none" stroke="#fbbf24" strokeWidth="1" opacity="0.25"/>
+  </svg>);
 }
 
-function FitBar({ tag, value, weight }) {
-  const pct = Math.round(value * 100);
-  const c = pct >= 80 ? "#16a34a" : pct >= 50 ? "#d97706" : "#dc2626";
-  return (
-    <div className="fit-row">
-      <div className="fit-header">
-        <span className="fit-tag">{tag} ({weight}%)</span>
-        <span className="fit-val" style={{ color: c }}>{pct}%</span>
-      </div>
-      <div className="fit-track"><div className="fit-fill" style={{ width: pct+"%", background: c }}/></div>
-    </div>
-  );
+function FitBar({tag,value,weight}){
+  const pct=Math.round(value*100),c=pct>=80?"#16a34a":pct>=50?"#d97706":"#dc2626";
+  return (<div className="fit-row"><div className="fit-header"><span className="fit-tag">{tag} ({weight}%)</span><span className="fit-val" style={{color:c}}>{pct}%</span></div><div className="fit-track"><div className="fit-fill" style={{width:pct+"%",background:c}}/></div></div>);
 }
 
-function ParamSlider({ label, tag, value, onChange, min, max, step, optimal, unit, auto }) {
-  const pct = ((value - min) / (max - min)) * 100;
-  const optPct = optimal != null ? ((optimal - min) / (max - min)) * 100 : null;
-  const bg = `linear-gradient(to right, #a3a3a3 0%, #404040 ${pct}%, #e5e5e5 ${pct}%, #e5e5e5 100%)`;
-  return (
-    <div className="param">
-      <div className="param-header">
-        <div className="param-left">
-          <span className="param-tag">{tag}</span>
-          <span className="param-label">{label}</span>
-          {auto && <span className="param-auto">AUTO</span>}
-        </div>
-        <span className="param-value">{value}{unit}</span>
-      </div>
-      <div className="param-slider-wrap">
-        <input type="range" className="param-slider" min={min} max={max} step={step} value={value}
-          onChange={e => onChange(parseFloat(e.target.value))} style={{ background: bg }}/>
-        {optPct != null && <div className="param-optimal" style={{ left: optPct+"%" }}/>}
-      </div>
-      <div className="param-range">
-        <span>{min}{unit}</span>
-        {optimal != null && <span className="param-range-center">optimal: {optimal}{unit}</span>}
-        <span>{max}{unit}</span>
-      </div>
-    </div>
-  );
+function ParamSlider({label,tag,value,onChange,min,max,step,optimal,unit,badge}){
+  const pct=((value-min)/(max-min))*100, optPct=optimal!=null?((optimal-min)/(max-min))*100:null;
+  const bg=`linear-gradient(to right,#a3a3a3 0%,#404040 ${pct}%,#e5e5e5 ${pct}%,#e5e5e5 100%)`;
+  return (<div className="param"><div className="param-header"><div className="param-left"><span className="param-tag">{tag}</span><span className="param-label">{label}</span>{badge&&<span className={"param-badge "+badge.cls}>{badge.text}</span>}</div><span className="param-value">{value}{unit}</span></div><div className="param-slider-wrap"><input type="range" className="param-slider" min={min} max={max} step={step} value={value} onChange={e=>onChange(parseFloat(e.target.value))} style={{background:bg}}/>{optPct!=null&&<div className="param-optimal" style={{left:optPct+"%"}}/>}</div><div className="param-range"><span>{min}{unit}</span>{optimal!=null&&<span>optimal: {optimal}{unit}</span>}<span>{max}{unit}</span></div></div>);
 }
 
-/* ── main ── */
-function App() {
-  const [image, setImage] = useState(null);
-  const [imgSize, setImgSize] = useState(null);
-  const [fr, setFr] = useState(35);
-  const [frAuto, setFrAuto] = useState(null);
-  const [sc, setSc] = useState(5);
-  const [nsr, setNsr] = useState(25);
-  const [dl, setDl] = useState(3.5);
-  const [showGrid, setShowGrid] = useState(true);
-  const [corner, setCorner] = useState("SE");
-  const [gridOpacity, setGridOpacity] = useState(0.8);
-  const [estimating, setEstimating] = useState(false);
+function App(){
+  const [image,setImage]=useState(null);
+  const [imgSize,setImgSize]=useState(null);
+  const [fr,setFr]=useState(35);
+  const [frAuto,setFrAuto]=useState(null);
+  const [frSource,setFrSource]=useState("default");
+  const [sc,setSc]=useState(5);
+  const [nsr,setNsr]=useState(25);
+  const [dl,setDl]=useState(3.5);
+  const [showGrid,setShowGrid]=useState(true);
+  const [corner,setCorner]=useState("SE");
+  const [gridOpacity,setGridOpacity]=useState(0.8);
+  const [estimating,setEstimating]=useState(false);
+  const [subjectBox,setSubjectBox]=useState(null);
+  const [dragging,setDragging]=useState(false);
+  const [dragStart,setDragStart]=useState(null);
+  const [selectMode,setSelectMode]=useState(false);
 
-  const fileRef = useRef(null);
-  const imgRef = useRef(null);
-  const canvasRef = useRef(null);
+  const fileRef=useRef(null),imgRef=useRef(null),canvasRef=useRef(null),wrapRef=useRef(null);
 
-  const onUpload = useCallback(e => {
-    const file = e.target.files && e.target.files[0];
-    if (!file || !/^image\//.test(file.type)) return;
-    const reader = new FileReader();
-    reader.onload = ev => { setImage(ev.target.result); setFrAuto(null); };
-    reader.readAsDataURL(file);
-  }, []);
+  const onUpload=useCallback(e=>{
+    const f=e.target.files&&e.target.files[0];
+    if(!f||!/^image\//.test(f.type))return;
+    const r=new FileReader();
+    r.onload=ev=>{setImage(ev.target.result);setFrAuto(null);setFrSource("default");setSubjectBox(null);setSelectMode(false);};
+    r.readAsDataURL(f);
+  },[]);
 
-  const onImgLoad = useCallback(e => {
-    const el = e.currentTarget;
-    setImgSize({ w: el.naturalWidth, h: el.naturalHeight });
+  const onImgLoad=useCallback(e=>{
+    const el=e.currentTarget;
+    setImgSize({w:el.naturalWidth,h:el.naturalHeight});
     setEstimating(true);
-    requestAnimationFrame(() => {
-      try {
-        const est = estimateFR(el, canvasRef.current);
-        setFrAuto(est);
-        setFr(est);
-      } catch(err) { console.error("FR estimation failed:", err); }
+    requestAnimationFrame(()=>{
+      try{const est=estimateFR(el,canvasRef.current);setFrAuto(est);setFr(est);setFrSource("auto");}catch(err){console.error(err);}
       setEstimating(false);
     });
-  }, []);
+  },[]);
 
-  const { score, fits } = useMemo(() => calcGHR(fr, sc, nsr, dl), [fr, sc, nsr, dl]);
-  const band = useMemo(() => getBand(score), [score]);
+  const getRelPos=useCallback(e=>{
+    if(!wrapRef.current) return null;
+    const r=wrapRef.current.getBoundingClientRect();
+    const cx=e.touches?e.touches[0].clientX:e.clientX;
+    const cy=e.touches?e.touches[0].clientY:e.clientY;
+    return{x:Math.max(0,Math.min(100,((cx-r.left)/r.width)*100)),y:Math.max(0,Math.min(100,((cy-r.top)/r.height)*100))};
+  },[]);
 
-  const adjustments = useMemo(() => {
-    const out = [];
-    if (fr < 25) out.push("FR低: 主役が小さすぎる → 30–37%を目指す");
-    if (fr > 45) out.push("FR高: 主役が大きすぎる → 圧迫感を下げる");
-    if (sc < 3) out.push("SC低: 副要素を追加して視線誘導を作る");
-    if (sc > 7) out.push("SC高: 副要素を削減して焦点を明確化");
-    if (nsr < 15) out.push("NSR低: 余白不足 → ネガティブスペースを増やす");
-    if (nsr > 35) out.push("NSR高: 余白過多 → 意味のある要素を加える");
-    if (dl < 2.5) out.push("DL低: 奥行きを追加して3層以上に");
-    if (dl > 4.5) out.push("DL高: 階層過多 → 3–4層に集約");
-    return out;
-  }, [fr, sc, nsr, dl]);
+  const onPointerDown=useCallback(e=>{
+    if(!selectMode)return;
+    e.preventDefault();
+    const p=getRelPos(e); if(!p)return;
+    setDragging(true); setDragStart(p); setSubjectBox(null);
+  },[selectMode,getRelPos]);
 
-  return (
-    <div>
-      <canvas ref={canvasRef} style={{ display: "none" }}/>
+  const onPointerMove=useCallback(e=>{
+    if(!dragging||!dragStart)return;
+    e.preventDefault();
+    const p=getRelPos(e); if(!p)return;
+    setSubjectBox({x:Math.min(dragStart.x,p.x),y:Math.min(dragStart.y,p.y),w:Math.abs(p.x-dragStart.x),h:Math.abs(p.y-dragStart.y)});
+  },[dragging,dragStart,getRelPos]);
 
-      <header className="header" style={{ display: "flex", alignItems: "baseline", gap: 12 }}>
-        <h1>GHR<span>/v0</span></h1>
-        <span className="header-sub">Golden Harmony Ratio — Fixed Geometry + Auto FR</span>
-      </header>
+  const onPointerUp=useCallback(()=>{
+    if(!dragging)return;
+    setDragging(false); setDragStart(null); setSelectMode(false);
+    setSubjectBox(prev=>{
+      if(!prev||prev.w<1||prev.h<1) return prev;
+      const area=(prev.w/100)*(prev.h/100)*100;
+      const v=Math.max(1,Math.min(99,Math.round(area)));
+      setFr(v); setFrSource("user");
+      return prev;
+    });
+  },[dragging]);
 
-      <div className="container">
-        <div className="grid">
-          {/* left */}
-          <div>
-            <div className="card">
-              {!image ? (
-                <div className="upload-zone" onClick={() => fileRef.current && fileRef.current.click()}>
-                  <div className="upload-icon">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                      <path d="M10 4v12M4 10h12" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round"/>
-                    </svg>
-                  </div>
-                  <p style={{ fontSize: 13, color: "#737373", marginBottom: 4 }}>画像をアップロード</p>
-                  <p style={{ fontSize: 11, color: "#a3a3a3" }}>JPG / PNG / WebP</p>
-                </div>
-              ) : (
-                <div className="img-wrap">
-                  <img ref={imgRef} src={image} alt="target" onLoad={onImgLoad}/>
-                  <GoldenGrid show={showGrid} corner={corner} opacity={gridOpacity}/>
-                  {estimating && (
-                    <div className="estimating-overlay">
-                      <span className="estimating-text">FR推定中...</span>
-                    </div>
-                  )}
-                </div>
-              )}
-              <input ref={fileRef} type="file" accept="image/*" onChange={onUpload} style={{ display: "none" }}/>
-            </div>
+  const clearSubject=useCallback(()=>{
+    setSubjectBox(null);
+    if(frAuto!==null){setFr(frAuto);setFrSource("auto");}
+    else{setFr(35);setFrSource("default");}
+  },[frAuto]);
 
-            {image && (
-              <div className="controls-bar">
-                <button className={"btn " + (showGrid ? "btn-active" : "")} onClick={() => setShowGrid(v => !v)}>
-                  Grid {showGrid ? "ON" : "OFF"}
-                </button>
-                <div className="btn-group">
-                  {["NW","NE","SW","SE"].map(c => (
-                    <button key={c} className={corner === c ? "active" : ""} onClick={() => setCorner(c)}>{c}</button>
-                  ))}
-                </div>
-                <div className="opacity-ctrl">
-                  <span>透明度</span>
-                  <input type="range" min="0.1" max="1" step="0.05" value={gridOpacity}
-                    onChange={e => setGridOpacity(parseFloat(e.target.value))}/>
-                </div>
-                <button className="btn" onClick={() => fileRef.current && fileRef.current.click()}>変更</button>
-                {imgSize && <span className="dim-label">{imgSize.w}×{imgSize.h}</span>}
-              </div>
-            )}
-          </div>
+  const {score,fits}=useMemo(()=>calcGHR(fr,sc,nsr,dl),[fr,sc,nsr,dl]);
+  const band=useMemo(()=>getBand(score),[score]);
 
-          {/* right */}
-          <div>
-            {/* score band */}
-            <div className="card band-card" style={{ borderColor: band.border, background: band.bg, marginBottom: 16 }}>
-              <div className="band-score" style={{ color: band.color }}>{score.toFixed(1)}</div>
-              <div style={{ marginBottom: 8 }}>
-                <span className="band-label" style={{ color: band.color }}>{band.label}</span>
-                <span className="band-action" style={{ background: band.color }}>{band.action}</span>
-              </div>
-              <div className="band-desc">{band.desc}</div>
-              <div className="band-pipeline" style={{ borderColor: band.border }}>
-                GHR → <span style={{ color: band.color }}>{band.label}</span> → CAG/IAD
-              </div>
-            </div>
+  const adjustments=useMemo(()=>{
+    const o=[];
+    if(fr<25)o.push("FR低: 主役が小さすぎる → 30–37%を目指す");
+    if(fr>45)o.push("FR高: 主役が大きすぎる → 圧迫感を下げる");
+    if(sc<3)o.push("SC低: 副要素を追加して視線誘導を作る");
+    if(sc>7)o.push("SC高: 副要素を削減して焦点を明確化");
+    if(nsr<15)o.push("NSR低: 余白不足 → ネガティブスペースを増やす");
+    if(nsr>35)o.push("NSR高: 余白過多 → 意味のある要素を加える");
+    if(dl<2.5)o.push("DL低: 奥行きを追加して3層以上に");
+    if(dl>4.5)o.push("DL高: 階層過多 → 3–4層に集約");
+    return o;
+  },[fr,sc,nsr,dl]);
 
-            {/* fit analysis */}
-            <div className="card" style={{ marginBottom: 16 }}>
-              <div className="card-body">
-                <div className="section-title">Fit Analysis</div>
-                <FitBar tag="FR" value={fits.fr} weight={40}/>
-                <FitBar tag="SC" value={fits.sc} weight={25}/>
-                <FitBar tag="NSR" value={fits.nsr} weight={20}/>
-                <FitBar tag="DL" value={fits.dl} weight={15}/>
-              </div>
-            </div>
+  const frBadge=frSource==="user"?{text:"USER",cls:"param-badge-user"}:frSource==="auto"?{text:"AUTO",cls:"param-badge-auto"}:null;
 
-            {/* parameters */}
-            <div className="card" style={{ marginBottom: 16 }}>
-              <div className="card-body">
-                <div className="section-title">Parameters</div>
-                <ParamSlider label="主役率" tag="FR" value={fr} onChange={setFr}
-                  min={0} max={100} step={1} optimal={35} unit="%" auto={frAuto !== null}/>
-                {frAuto !== null && fr !== frAuto && (
-                  <button className="reset-btn" onClick={() => setFr(frAuto)}>
-                    ↩ 自動推定値に戻す ({frAuto}%)
-                  </button>
-                )}
-                <ParamSlider label="副要素数" tag="SC" value={sc} onChange={setSc}
-                  min={0} max={15} step={1} optimal={5} unit="個"/>
-                <ParamSlider label="余白率" tag="NSR" value={nsr} onChange={setNsr}
-                  min={0} max={100} step={1} optimal={25} unit="%"/>
-                <ParamSlider label="奥行き層" tag="DL" value={dl} onChange={setDl}
-                  min={1} max={6} step={0.5} optimal={3.5} unit="層"/>
-              </div>
-            </div>
+  return (<div>
+    <canvas ref={canvasRef} style={{display:"none"}}/>
+    <header className="header" style={{display:"flex",alignItems:"baseline",gap:12}}>
+      <h1>GHR<span>/v0</span></h1>
+      <span className="header-sub">Golden Harmony Ratio — Fixed Geometry + Subject Selection</span>
+    </header>
+    <div className="container"><div className="grid">
+      <div>
+        <div className="card">
+          {!image?(<div className="upload-zone" onClick={()=>fileRef.current&&fileRef.current.click()}>
+            <div className="upload-icon"><svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 4v12M4 10h12" stroke="#9ca3af" strokeWidth="2" strokeLinecap="round"/></svg></div>
+            <p style={{fontSize:13,color:"#737373",marginBottom:4}}>画像をアップロード</p>
+            <p style={{fontSize:11,color:"#a3a3a3"}}>JPG / PNG / WebP</p>
+          </div>):(<div ref={wrapRef} className="img-wrap" style={{cursor:selectMode?"crosshair":"default"}}
+            onMouseDown={onPointerDown} onMouseMove={onPointerMove} onMouseUp={onPointerUp} onMouseLeave={onPointerUp}
+            onTouchStart={onPointerDown} onTouchMove={onPointerMove} onTouchEnd={onPointerUp}>
+            <img ref={imgRef} src={image} alt="target" onLoad={onImgLoad}/>
+            <GoldenGrid show={showGrid} corner={corner} opacity={gridOpacity}/>
+            {subjectBox&&<div className="subject-box" style={{left:subjectBox.x+"%",top:subjectBox.y+"%",width:subjectBox.w+"%",height:subjectBox.h+"%"}}>
+              <span className="subject-label">SUBJECT {Math.round((subjectBox.w/100)*(subjectBox.h/100)*100)}%</span>
+            </div>}
+            {estimating&&<div className="estimating-overlay"><span className="estimating-text">FR推定中...</span></div>}
+            {selectMode&&!dragging&&<div className="subject-hint">ドラッグで主役を囲む</div>}
+          </div>)}
+          <input ref={fileRef} type="file" accept="image/*" onChange={onUpload} style={{display:"none"}}/>
+        </div>
+        {image&&<div className="controls-bar">
+          <button className={"btn "+(selectMode?"btn-rose":subjectBox?"btn-rose-outline":"")} onClick={()=>setSelectMode(v=>!v)}>
+            {selectMode?"選択中...":"主役を指定"}
+          </button>
+          {subjectBox&&<button className="btn" onClick={clearSubject}>リセット</button>}
+          <button className={"btn "+(showGrid?"btn-active":"")} onClick={()=>setShowGrid(v=>!v)}>Grid {showGrid?"ON":"OFF"}</button>
+          <div className="btn-group">{["NW","NE","SW","SE"].map(c=>(<button key={c} className={corner===c?"active":""} onClick={()=>setCorner(c)}>{c}</button>))}</div>
+          <div className="opacity-ctrl"><span>透明度</span><input type="range" min="0.1" max="1" step="0.05" value={gridOpacity} onChange={e=>setGridOpacity(parseFloat(e.target.value))}/></div>
+          <button className="btn" onClick={()=>fileRef.current&&fileRef.current.click()}>変更</button>
+          {imgSize&&<span className="dim-label">{imgSize.w}×{imgSize.h}</span>}
+        </div>}
+      </div>
 
-            {/* adjustments */}
-            {adjustments.length > 0 && (
-              <div className="card" style={{ marginBottom: 16 }}>
-                <div className="card-body">
-                  <div className="section-title">Adjustments</div>
-                  {adjustments.map((t, i) => <div key={i} className="adj-item">{t}</div>)}
-                </div>
-              </div>
-            )}
+      <div>
+        <div className="card band-card" style={{borderColor:band.border,background:band.bg,marginBottom:16}}>
+          <div className="band-score" style={{color:band.color}}>{score.toFixed(1)}</div>
+          <div style={{marginBottom:8}}><span className="band-label" style={{color:band.color}}>{band.label}</span><span className="band-action" style={{background:band.color}}>{band.action}</span></div>
+          <div className="band-desc">{band.desc}</div>
+          <div className="band-pipeline" style={{borderColor:band.border}}>GHR → <span style={{color:band.color}}>{band.label}</span> → CAG/IAD</div>
+        </div>
 
-            {/* fixed spec */}
-            <div className="spec">
-              <div className="spec-title">Fixed Spec</div>
-              <div>φ = {PHI.toFixed(12)}</div>
-              <div>grid = {(PHI_INV*100).toFixed(2)}% / {(PHI*100).toFixed(2)}%</div>
-              <div>weights = FR:{WEIGHTS.fr} SC:{WEIGHTS.sc} NSR:{WEIGHTS.nsr} DL:{WEIGHTS.dl}</div>
-              <div>bands = Priority(≥70) Normal(≥40) Hold(&lt;40)</div>
-              <div>fit = exp(-(x-μ)²/2σ²)</div>
-            </div>
-          </div>
+        {image&&<div className="fr-info" style={{background:frSource==="user"?"#fff1f2":frSource==="auto"?"#f0fdf4":"#f5f5f5",color:frSource==="user"?"#9f1239":frSource==="auto"?"#166534":"#737373"}}>
+          {frSource==="user"&&("FR: ユーザー指定（主役選択） — "+fr+"%")}
+          {frSource==="auto"&&"FR: 自動推定（saliency） — 「主役を指定」で上書き可能"}
+          {frSource==="default"&&"FR: デフォルト値"}
+        </div>}
+
+        <div className="card" style={{marginBottom:16}}><div className="card-body">
+          <div className="section-title">Fit Analysis</div>
+          <FitBar tag="FR" value={fits.fr} weight={40}/>
+          <FitBar tag="SC" value={fits.sc} weight={25}/>
+          <FitBar tag="NSR" value={fits.nsr} weight={20}/>
+          <FitBar tag="DL" value={fits.dl} weight={15}/>
+        </div></div>
+
+        <div className="card" style={{marginBottom:16}}><div className="card-body">
+          <div className="section-title">Parameters</div>
+          <ParamSlider label="主役率" tag="FR" value={fr} onChange={v=>{setFr(v);setFrSource("user");setSubjectBox(null);}} min={0} max={100} step={1} optimal={35} unit="%" badge={frBadge}/>
+          {frSource==="user"&&frAuto!==null&&<button className="reset-btn" onClick={()=>{setFr(frAuto);setFrSource("auto");setSubjectBox(null);}}>↩ 自動推定値に戻す ({frAuto}%)</button>}
+          <ParamSlider label="副要素数" tag="SC" value={sc} onChange={setSc} min={0} max={15} step={1} optimal={5} unit="個"/>
+          <ParamSlider label="余白率" tag="NSR" value={nsr} onChange={setNsr} min={0} max={100} step={1} optimal={25} unit="%"/>
+          <ParamSlider label="奥行き層" tag="DL" value={dl} onChange={setDl} min={1} max={6} step={0.5} optimal={3.5} unit="層"/>
+        </div></div>
+
+        {adjustments.length>0&&<div className="card" style={{marginBottom:16}}><div className="card-body">
+          <div className="section-title">Adjustments</div>
+          {adjustments.map((t,i)=><div key={i} className="adj-item">{t}</div>)}
+        </div></div>}
+
+        <div className="spec">
+          <div className="spec-title">Fixed Spec</div>
+          <div>φ = {PHI.toFixed(12)}</div>
+          <div>grid = {(PHI_INV*100).toFixed(2)}% / {(PHI*100).toFixed(2)}%</div>
+          <div>weights = FR:{WEIGHTS.fr} SC:{WEIGHTS.sc} NSR:{WEIGHTS.nsr} DL:{WEIGHTS.dl}</div>
+          <div>bands = Priority(≥70) Normal(≥40) Hold(&lt;40)</div>
+          <div>fit = exp(-(x-μ)²/2σ²)</div>
         </div>
       </div>
-    </div>
-  );
+    </div></div>
+  </div>);
 }
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
