@@ -197,10 +197,55 @@ function estimateFR(imgEl, canvas) {
     }
   }
 
-  const thresh = minS + (maxS - minS) * 0.6;
-  let cnt = 0;
-  for (let i = 0; i < total; i++) if (sal[i] >= thresh) cnt++;
-  return Math.max(1, Math.min(99, Math.round((cnt / total) * 100)));
+  // 5. threshold into binary salient map
+  const thresh = minS + (maxS - minS) * 0.55;
+  const binary = new Uint8Array(total);
+  for (let i = 0; i < total; i++) binary[i] = sal[i] >= thresh ? 1 : 0;
+
+  // 6. connected-component labeling (flood fill) → find largest mass = subject
+  const labels = new Int32Array(total);
+  labels.fill(-1);
+  let labelId = 0;
+  const componentSizes = [];
+
+  for (let i = 0; i < total; i++) {
+    if (binary[i] === 0 || labels[i] !== -1) continue;
+    // BFS flood fill
+    const queue = [i];
+    labels[i] = labelId;
+    let size = 0;
+    while (queue.length > 0) {
+      const cur = queue.pop();
+      size++;
+      const cy2 = Math.floor(cur / W), cx2 = cur % W;
+      for (let dy = -1; dy <= 1; dy++) {
+        for (let dx = -1; dx <= 1; dx++) {
+          if (dy === 0 && dx === 0) continue;
+          const ny = cy2 + dy, nx = cx2 + dx;
+          if (ny >= 0 && ny < H && nx >= 0 && nx < W) {
+            const ni = ny * W + nx;
+            if (binary[ni] === 1 && labels[ni] === -1) {
+              labels[ni] = labelId;
+              queue.push(ni);
+            }
+          }
+        }
+      }
+    }
+    componentSizes.push({ id: labelId, size });
+    labelId++;
+  }
+
+  if (componentSizes.length === 0) return 35; // fallback to optimal
+
+  // 7. select subject: largest connected component
+  componentSizes.sort((a, b) => b.size - a.size);
+  const subjectId = componentSizes[0].id;
+
+  // 8. FR = subject area / total area
+  const subjectSize = componentSizes[0].size;
+  const frEstimate = Math.round((subjectSize / total) * 100);
+  return Math.max(1, Math.min(99, frEstimate));
 }
 
 /* ── components ── */
