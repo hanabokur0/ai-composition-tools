@@ -1,8 +1,18 @@
 # ai-composition-tools
 # GHR — Golden Harmony Ratio Image Analyzer
 
-**LoPAS-SEED Observation Tool**
-Status: v0.1 | 2026-04
+GHR Analyzer v0
+
+A measurement-oriented composition analyzer based on:
+
+- Fixed golden-ratio geometry
+- Fixed weighting structure
+- Fixed judgment bands
+- Auto-estimated FR (with human override)
+
+Output:
+Priority / Normal / Hold
+(compatible with CAG / IAD workflows)
 
 ---
 
